@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static tailwind_tags %}
+{% block title %}Home{% endblock title %}
+{% block body %}
+
+{% tailwind_css %}
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Main Layout -->
+  <main class="p-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+    <!-- Sidebar: Filters -->
+    <aside class="bg-white p-4 rounded-2xl shadow-md md:col-span-1">
+      <h2 class="text-xl font-semibold mb-4">Filter Preferences</h2>
+      <form id="phoneForm" class="space-y-4" method='POST' action='/recommend/'>
+        {% csrf_token %}
+        <div>
+          <label class="block text-sm font-medium">Select Brand</label>
+          <select id="brand" class="w-full mt-1 p-2 border rounded" name='brand'>
+            <option>Any</option>
+            <option>Apple</option>
+            <option>Samsung</option>
+            <option>Xiaomi</option>
+            <option>OnePlus</option>
+            <option>Realme</option>
+            <option>Oppo</option>
+            <option>Vivo</option>
+            <option>Google</option>
+            <option>Motorola</option>
+            <option>Asus</option>
+            <option>Nokia</option>
+            <option>Honor</option>
+            <option>Huawei</option>
+            <option>Nothing</option>
+            <option>Infinix</option>
+            <option>iQOO</option>
+            <option>Lenovo</option>
+            <option>Micromax</option>
+            <option>Lava</option>
+            <option>Panasonic</option>
+            <option>Meizu</option>
+            <option>Coolpad</option>
+            <option>HTC</option>
+            <option>Gionee</option>
+            <option>Alcatel</option>
+            <option>Sharp</option>
+            <option>Fairphone</option>
+            <option>TCL</option>
+            <option>BlackBerry</option>
+            <option>BLU</option>
+            <option>LeEco</option>
+            <option>Philips</option>
+            <option>Sony</option>
+            <option>ZTE</option>
+            <option>Karbonn</option>
+            <option>Technomobile</option>
+            <option>Celkon</option>
+            <option>Maxwest</option>
+            <option>Ulefone</option>
+            <option>Doogee</option>
+            <option>Elephone</option>
+            <option>Cat Phones</option>
+            <option>Energizer</option>
+            <option>YotaPhone</option>
+            <option>QMobile</option>
+            <option>Wiko</option>
+            <option>BQ</option>
+            <option>Symphony</option>
+            <option>Prestigio</option>
+            <option>General Mobile</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium">Max Price (₹)</label>
+          <input name="max_price" type="number" class="w-full mt-1 p-2 border rounded" placeholder="e.g., 70000" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium">RAM (GB)</label>
+          <input name="min_ram" type="number" class="w-full mt-1 p-2 border rounded" placeholder="e.g., 4" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium">Min Storage (GB)</label>
+          <input name="min_storage" type="number" class="w-full mt-1 p-2 border rounded" placeholder="e.g., 128" />
+        </div>
+        <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Find Phones</button>
+      </form>
+    </aside>
+
+    <!-- Main Content: Recommendations -->
+    <section class="md:col-span-3 space-y-4">
+      {% if recommendations %}
+  <div class="flex justify-end mb-4">
+    <form method="get" class="flex items-center space-x-2">
+      <label for="sort_by" class="text-sm font-medium">Sort by:</label>
+      <select name="sort_by" id="sort_by" class="border p-1 rounded" onchange="this.form.submit()">
+        <option value="" {% if request.GET.sort_by == "" %}selected{% endif %}>Best Match</option>
+        <option value="name" {% if request.GET.sort_by == "name" %}selected{% endif %}>Name (A–Z)</option>
+        <option value="price_asc" {% if request.GET.sort_by == "price_asc" %}selected{% endif %}>Price (Low to High)</option>
+        <option value="price_desc" {% if request.GET.sort_by == "price_desc" %}selected{% endif %}>Price (High to Low)</option>
+      </select>
+    </form>
+  </div>
+{% endif %}
+
+      <h2 class="text-xl font-semibold">Recommended Smartphones</h2>
+
+      {% if recommendations %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="phoneList">
+          {% for phone in recommendations %}
+          <div class="bg-white rounded-2xl shadow-md p-4">
+            <div>
+        <img src="{{ phone.img_url }}" alt="{{ phone.name }}" class="rounded-xl shadow-md w-full h-[300px]" />
+      </div>
+           <h3 class="text-lg font-bold">{{ phone.name }} {{ phone.model }}</h3>
+            <p class="text-sm text-gray-500">{{ phone.storage }} • {{ phone.ram }}</p>
+            <p class="mt-2 font-semibold">{{ phone.price }}</p>
+            <p class="text-green-600 text-sm">Score: {{ phone.Score|floatformat:2 }}</p>
+            <a href="{% url 'phone_detail' phone.model|lower|slugify %}">
+              <button class="mt-2 bg-green-600 text-white w-full py-1 rounded hover:bg-green-700">View Details</button>
+            </a>
+              </div>
+          {% endfor %}
+        </div>
+      {% elif error %}
+        <p class="text-red-500 font-semibold">{{ error }}</p>
+      {% else %}
+        <p class="text-gray-500">No results yet. Use the filter to find phones.</p>
+      {% endif %}
+    </section>
+  </main>
+
+</body>
+{% endblock body %}

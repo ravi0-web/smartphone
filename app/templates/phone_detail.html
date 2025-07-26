@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static tailwind_tags %}
+{% block title %}{{ phone.name }} Details{% endblock title %}
+{% block body %}
+{% tailwind_css %}
+
+<body class="bg-gray-100 min-h-screen p-6">
+
+  <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-md p-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Phone Image -->
+      <div>
+        <img src="{{ phone.img_url }}" alt="{{ phone.name }}" class="rounded-xl shadow-md w-full h-auto" />
+      </div>
+
+      <!-- Phone Details -->
+      <div>
+        <h1 class="text-2xl font-bold mb-2">{{ phone.name }} {{ phone.model }}</h1>
+        <p class="text-sm text-gray-500 mb-4">{{ phone.storage }} • {{ phone.ram }}</p>
+
+        <div class="space-y-2 text-gray-700">
+          <p><strong>Brand:</strong> {{ phone.name }}</p>
+          <p><strong>Storage:</strong> {{ phone.storage }}</p>
+          <p><strong>RAM:</strong> {{ phone.ram }}</p>
+          <p><strong>Primary Camera:</strong> {{ phone.primary_camera }}</p>
+          <p><strong>Secondary Camera:</strong> {{ phone.secondary_camera }}</p>
+          <p><strong>Colour:</strong> {{ phone.colors }}</p>
+          <p><strong>Processor:</strong> {{ phone.processor }}</p>
+          <p><strong>GPU:</strong> {{ phone.GPU}}</p>
+          <p><strong>OS:</strong> {{ phone.OS }}</p>
+          <p><strong>Display Resolution:</strong> {{ phone.display_resolution }}</p>
+          <p><strong>Memory:</strong> {{ phone.memory }}</p>
+          <p><strong>Loud Speaker:</strong> {{ phone.loud_speaker}}</p>
+          <p><strong>Sensors:</strong> {{ phone.sensors }}</p>
+          <p><strong>Battery:</strong> {{ phone.battery }}</p>
+          
+          <p class="text-xl text-green-600 font-semibold mt-4">💰 {{ phone.price }}</p>
+      
+        </div>
+
+        <a href="{% url 'recommend_phones' %}" class="inline-block mt-6 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+          Back to Recommendations
+        </a>
+      </div>
+    </div>
+  </div>
+
+</body>
+{% endblock body %}

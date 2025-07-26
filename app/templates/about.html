@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}About Us{% endblock title %}
+
+{% block body %}
+<div class="container mx-auto px-6 py-12">
+  <h1 class="text-4xl font-bold text-center text-[#E34F4F] mb-10">Meet the Developers</h1>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    <!-- Developer 1 -->
+    <div class="bg-white rounded-xl shadow-md p-6 text-center relative">
+      <img src="{% static 'ravi.jpeg' %}" class="w-28 h-28 mx-auto rounded-full mb-4" alt="Developer 1">
+      <h2 class="text-xl font-semibold text-[#E34F4F]">Ravi Gupta<br>Leader</h2>
+      <p class="text-gray-600 text-sm mt-2">Backend Developer<br>Specialised in Django</p>
+      <button onclick="toggleDropdown('dropdown-1')" class="mt-3 inline-flex items-center text-sm font-medium text-indigo-600 hover:underline focus:outline-none">
+        View More
+        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+      <div id="dropdown-1" class="hidden mt-3 text-left text-sm text-gray-600">
+        <p>Backend Developer.... Data Processing & Routing</p>
+        <p class="mt-2"><strong>Email:</strong> ravi.0102004g@gmail.com</p>
+        <p><strong>Location:</strong> Haldwani, India</p>
+      </div>
+    </div>
+
+    <!-- Developer 2 -->
+    <div class="bg-white rounded-xl shadow-md p-6 text-center relative">
+      <img src="{% static 'pulkit.jpeg' %}" class="w-28 h-28 mx-auto rounded-full mb-4" alt="Developer 2">
+      <h2 class="text-xl font-semibold text-[#E34F4F]">Pulkit Rana</h2>
+      <p class="text-gray-600 text-sm mt-2">Backend Developer<br>Specialised in Flask</p>
+      <button onclick="toggleDropdown('dropdown-2')" class="mt-3 inline-flex items-center text-sm font-medium text-indigo-600 hover:underline focus:outline-none">
+        View More
+        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+      <div id="dropdown-2" class="hidden mt-3 text-left text-sm text-gray-600">
+        <p>Backend Developer .... Recommendation & Filtering</p>
+        <p class="mt-2"><strong>Email:</strong> pulkitrana2447@gmail.com</p>
+        <p><strong>Location:</strong> Haldwani, India</p>
+      </div>
+    </div>
+
+    <!-- Developer 3 -->
+    <div class="bg-white rounded-xl shadow-md p-6 text-center relative">
+      <img src="{% static 'shubham.jpeg' %}" class="w-28 h-28 mx-auto rounded-full mb-4" alt="Developer 3">
+      <h2 class="text-xl font-semibold text-[#E34F4F]">Shubham Banaula</h2>
+      <p class="text-gray-600 text-sm mt-2">Frontend Developer</p>
+      <button onclick="toggleDropdown('dropdown-3')" class="mt-3 inline-flex items-center text-sm font-medium text-indigo-600 hover:underline focus:outline-none">
+        View More
+        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+      <div id="dropdown-3" class="hidden mt-3 text-left text-sm text-gray-600">
+        <p>Frontend Developer ....Search Bar & UX/UI Logic.</p>
+        <p class="mt-2"><strong>Email:</strong> shubhambanaula@gmail.com</p>
+        <p><strong>Location:</strong> Haldwani, India</p>
+      </div>
+    </div>
+
+    <!-- Developer 4 -->
+    <div class="bg-white rounded-xl shadow-md p-6 text-center relative">
+      <img src="{% static 'rohit.jpeg' %}" class="w-28 h-28 mx-auto rounded-full mb-4" alt="Developer 4">
+      <h2 class="text-xl font-semibold text-[#E34F4F]">Rohit Bora</h2>
+      <p class="text-gray-600 text-sm mt-2">Data Scientist<br>Loves analyzing and visualizing data</p>
+      <button onclick="toggleDropdown('dropdown-4')" class="mt-3 inline-flex items-center text-sm font-medium text-indigo-600 hover:underline focus:outline-none">
+        View More
+        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+      <div id="dropdown-4" class="hidden mt-3 text-left text-sm text-gray-600">
+        <p>rontend Developer ....Design & Tailwind Layout</p>
+        <p class="mt-2"><strong>Email:</strong> rahulxbora875@gmail.com</p>
+        <p><strong>Location:</strong> Haldwani, India</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dropdown Script -->
+<script>
+  function toggleDropdown(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('hidden');
+  }
+</script>
+{% endblock body %}

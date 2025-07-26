@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}Compare{% endblock title %}
+
+{% block body %}
+<div class="container mx-auto p-6">
+  <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-5xl mx-auto mt-6">
+    <h1 class="text-3xl font-bold text-center text-[#E34F4F] mb-10">Compare Smartphones</h1>
+
+    <!-- Form -->
+    <form method="POST" action="/compare/" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+      {% csrf_token %}
+      <div>
+        <label class="block font-medium text-gray-700 mb-1">Phone 1</label>
+        <input id="phone1" name="phone1" type="text" placeholder="e.g. iPhone 14 Pro Max"
+               class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#E34F4F]" autocomplete="off">
+        <div id="suggestions1" class="bg-white border rounded-lg shadow mt-1 hidden"></div>
+      </div>
+      <div>
+        <label class="block font-medium text-gray-700 mb-1">Phone 2</label>
+        <input id="phone2" name="phone2" type="text" placeholder="e.g. Samsung S23 Ultra"
+               class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#E34F4F]" autocomplete="off">
+        <div id="suggestions2" class="bg-white border rounded-lg shadow mt-1 hidden"></div>
+      </div>
+      <div class="col-span-1 md:col-span-2 text-center">
+        <button type="submit"
+                class="bg-[#E34F4F] hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold transition duration-200">
+          Compare
+        </button>
+      </div>
+    </form>
+
+    {% if comparison %}
+    {% if comparison.error %}
+      <div class="text-center text-red-600 font-semibold">{{ comparison.error }}</div>
+    {% else %}
+    <!-- Comparison Table -->
+    <div class="grid grid-cols-3 items-center gap-6">
+      <div class="bg-gray-50 rounded-xl p-6 shadow ">
+        <h2 class="text-xl font-semibold mb-2 text-[#E34F4F]">{{ comparison.phone1.name }}</h2>
+         <img src="{{ comparison.phone1.img_url }}" alt="{{ comparison.phone1.name }}" class="w-full h-[300px] object-contain rounded-xl shadow-lg" />
+ 
+ 
+        <ul class="text-sm text-gray-700 space-y-2">
+          <li><strong>RAM:</strong> {{ comparison.phone1.ram }} </li>
+          <li><strong>Storage:</strong> {{ comparison.phone1.storage }} </li>
+          <li><strong>Battery:</strong> {{ comparison.phone1.battery }} </li>
+          <li><strong>Camera:</strong> {{ comparison.phone1.camera }} </li>
+          <li><strong>Processor:</strong> {{ comparison.phone1.processor }}</li>
+        </ul>
+      </div>
+
+      <div class="text-center">
+        <span class="text-2xl font-bold text-gray-500">VS</span>
+      </div>
+
+     <div class="bg-gray-50 rounded-xl p-6 shadow ">
+  <h2 class="text-xl font-semibold mb-2 text-[#E34F4F]">{{ comparison.phone2.name }}</h2>
+  <img src="{{ comparison.phone2.img_url }}" alt="{{ comparison.phone2.name }}" class="w-full h-[300px] object-contain rounded-xl shadow-lg" />
+
+       
+        <ul class="text-sm text-gray-700 space-y-2">
+          <li><strong>RAM:</strong> {{ comparison.phone2.ram }} </li>
+          <li><strong>Storage:</strong> {{ comparison.phone2.storage }} </li>
+          <li><strong>Battery:</strong> {{ comparison.phone2.battery }} </li>
+          <li><strong>Camera:</strong> {{ comparison.phone2.camera }} </li>
+          <li><strong>Processor:</strong> {{ comparison.phone2.processor }}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-10 text-center">
+      <p class="text-xl font-bold text-green-600">Better Option: {{ comparison.better }}</p>
+    </div>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+
+<script>
+function setupAutocomplete(inputId, suggestionBoxId) {
+    const input = document.getElementById(inputId);
+    const suggestionBox = document.getElementById(suggestionBoxId);
+
+    input.addEventListener('keyup', function () {
+        const query = this.value;
+        if (query.length < 2) {
+            suggestionBox.classList.add('hidden');
+            suggestionBox.innerHTML = '';
+            return;
+        }
+        fetch(`/search-phones/?term=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                suggestionBox.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(phone => {
+                        const div = document.createElement('div');
+                        div.textContent = phone;
+                        div.classList.add('px-4', 'py-2', 'hover:bg-gray-100', 'cursor-pointer');
+                        div.addEventListener('click', () => {
+                            input.value = phone;
+                            suggestionBox.classList.add('hidden');
+                        });
+                        suggestionBox.appendChild(div);
+                    });
+                    suggestionBox.classList.remove('hidden');
+                } else {
+                    suggestionBox.classList.add('hidden');
+                }
+            });
+    });
+}
+
+setupAutocomplete('phone1', 'suggestions1');
+setupAutocomplete('phone2', 'suggestions2');
+</script>
+
+{% endblock body %}

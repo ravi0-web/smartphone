@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smartphone Recommendation Tool | {% block title %}{% endblock title %}</title>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-[#E34F4F] text-white px-4 py-3 shadow-md">
+    <div class="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto">
+      <!-- Logo -->
+      <div class="mb-2 md:mb-0">
+        <h1 class="text-xl font-bold text-black">$mart$eek</h1>
+      </div>
+
+      <!-- Navigation Items -->
+      <div class="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+        <a href="{% url 'home' %}" class="hover:bg-white hover:text-[#E34F4F] px-3 py-2 rounded transition">Home</a>
+        
+        <a href="{% url 'compare' %}" class="hover:bg-white hover:text-[#E34F4F] px-3 py-2 rounded transition">Compare Phones</a>
+        <!-- Search Bar -->
+        <div class="bg-white rounded-full px-4 py-1 flex items-center relative">
+          <input type="text" id="searchInput" placeholder="Search your item" class="outline-none border-none text-black px-2 py-1 w-40 md:w-72" autocomplete="off" />
+          <button id="searchButton" class="text-[#E34F4F]">
+            <i class="fa fa-search"></i>
+          </button>
+          <div id="suggestions" class="absolute top-full left-0 w-full bg-white  text-[#E34F4F] rounded-b-xl shadow-md hidden z-10">
+            <!-- Suggestions will appear here -->
+          </div>
+        </div>
+          <a href="{% url "contact" %}" class="hover:bg-white hover:text-[#E34F4F] px-3 py-2 rounded transition">Contact Us</a>
+     
+
+        <a href="{% url "about" %}" class="hover:bg-white hover:text-[#E34F4F] px-3 py-2 rounded transition">About Us</a>
+         <a href="{% url 'logoutuser' %}" class="hover:bg-white hover:text-[#E34F4F] px-3 py-2 rounded transition">Signout <i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Body -->
+  {% block body %}{% endblock body %}
+
+  <!-- Footer -->
+  <footer class="bg-[#E34F4F] text-white mt-10">
+    <div class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- About -->
+      <div>
+        <h3 class="text-lg font-bold mb-2">About $mart$eek</h3>
+        <p class="text-sm text-gray-200">Helping you discover the best smartphones that match your needs — with zero dealership hassle!</p>
+      </div>
+
+      <!-- Quick Links -->
+      <div>
+        <h3 class="text-lg font-bold mb-2">Quick Links</h3>
+        <ul class="space-y-1 text-sm">
+          <li><a href="{% url 'home' %}" class="hover:underline">Home</a></li>
+          <li><a href="{% url 'compare' %}" class="hover:underline">Compare Phones</a></li>
+          <li><a href="{% url "about" %}" class="hover:underline">About Us</a></li>
+          <li><a href="{% url "contact" %}" class="hover:underline">Contact Us</a></li>
+        </ul>
+      </div>
+
+      <!-- Social Media -->
+      <div>
+        <h3 class="text-lg font-bold mb-2">Connect With Us</h3>
+        <div class="flex space-x-4 text-xl">
+          <a href="#" class="hover:text-black"><i class="fab fa-facebook"></i></a>
+          <a href="#" class="hover:text-black"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="hover:text-black"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="hover:text-black"><i class="fab fa-linkedin"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="text-center text-sm text-gray-200 border-t border-red-300 mt-6 py-3">
+      &copy; 2025 $mart$eek. All rights reserved.
+    </div>
+  </footer>
+
+  <!-- SEARCH SCRIPT -->
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    const suggestionsBox = document.getElementById('suggestions');
+
+    searchInput.addEventListener('input', async function() {
+      const query = this.value.trim();
+      if (query.length < 2) {
+        suggestionsBox.innerHTML = '';
+        suggestionsBox.classList.add('hidden');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/search-suggestions/?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        if (data.length > 0) {
+          suggestionsBox.innerHTML = data.map(item => `
+            <div class="px-4 py-2 hover:bg-gray-200 cursor-pointer" onclick="selectSuggestion('${item}')">${item}</div>
+          `).join('');
+          suggestionsBox.classList.remove('hidden');
+        } else {
+          suggestionsBox.innerHTML = '<div class="px-4 py-2 text-gray-500">No results found</div>';
+          suggestionsBox.classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('Error fetching suggestions:', error);
+      }
+    });
+
+    function selectSuggestion(name) {
+      searchInput.value = name;
+      suggestionsBox.innerHTML = '';
+      suggestionsBox.classList.add('hidden');
+    }
+
+    searchButton.addEventListener('click', function(event) {
+      event.preventDefault();
+      const query = searchInput.value.trim();
+      if (query.length > 0) {
+        window.location.href = `/search-results/?q=${encodeURIComponent(query)}`;
+      }
+    });
+    searchInput.addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault(); // prevent form submission if inside form
+    const query = searchInput.value.trim();
+    if (query.length > 0) {
+      window.location.href = `/search-results/?q=${encodeURIComponent(query)}`;
+    }
+  }
+});
+  </script>
+
+</body>
+</html>
