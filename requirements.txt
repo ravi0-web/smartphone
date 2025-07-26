@@ -1,10 +1,9 @@
-Django==5.2
+Django>=4.0
+pandas==2.2.2
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.12.2
 gunicorn
-channels==4.2.2
-asgiref==3.8.1
+
 django-tailwind==4.0.1
 django-browser-reload==1.18.0
-sqlparse==0.5.3
-pytz==2025.2
-whitenoise
-pandas==2.2.2
+
