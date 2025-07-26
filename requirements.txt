@@ -7,3 +7,4 @@ django-browser-reload==1.18.0
 sqlparse==0.5.3
 pytz==2025.2
 whitenoise
+pandas==2.2.2
