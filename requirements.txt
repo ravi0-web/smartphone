@@ -3,7 +3,7 @@ pandas==2.2.2
 fuzzywuzzy==0.18.0
 python-Levenshtein==0.12.2
 gunicorn
-
+whitenoise
 django-tailwind==4.0.1
 django-browser-reload==1.18.0
 
