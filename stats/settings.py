@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-_50fo)(%8y39rgwl$p-#_671jhb&n4rg-#xxukf)xvko=bup%+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1').split(',')
+ALLOWED_HOSTS = ['smartphone-production.up.railway.app']
 
 
 # Application definition
