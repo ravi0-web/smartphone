@@ -12,7 +12,7 @@ from .models import ContactMessage
 import os
 
 # Load and preprocess data once
-df = pd.read_csv('data/smartphones.csv')
+df = pd.read_csv(os.path.join(settings.BASE_DIR, 'data/smartphones.csv'))
 df.columns = df.columns.str.lower()
 df['full_name'] = df['name'].str.lower().fillna('') + ' ' + df['model'].str.lower().fillna('')
 df['slug'] = df['model'].str.lower().str.replace(' ', '-')
@@ -79,7 +79,7 @@ def recommend_phones(request):
             min_storage = float(request.POST.get('min_storage', 0))
 
             # Load and process CSV
-            df = pd.read_csv('data/smartphones.csv')
+            df = pd.read_csv(os.path.join(settings.BASE_DIR, 'data/smartphones.csv'))
             df['ram'] = df['ram'].astype(str)
             df['storage'] = df['storage'].astype(str)
             df['price'] = df['price'].astype(str)
