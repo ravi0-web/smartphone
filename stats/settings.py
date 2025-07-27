@@ -28,9 +28,9 @@ LOGIN_REDIRECT_URL = 'http://127.0.0.1:8000/home/'
 SECRET_KEY = 'django-insecure-_50fo)(%8y39rgwl$p-#_671jhb&n4rg-#xxukf)xvko=bup%+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = True
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1').split(',')
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -83,7 +83,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'stats.wsgi.application','web: gunicorn stats.wsgi'
+WSGI_APPLICATION = 'stats.wsgi.application'
 
 
 # Database
