@@ -17,7 +17,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback-secret-key')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-LOGIN_REDIRECT_URL = 'http://127.0.0.1:8000/home/'
+LOGIN_REDIRECT_URL = '/home/'
 
 
 
@@ -25,12 +25,14 @@ LOGIN_REDIRECT_URL = 'http://127.0.0.1:8000/home/'
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-_50fo)(%8y39rgwl$p-#_671jhb&n4rg-#xxukf)xvko=bup%+'
+SECRET_KEY = os.environ.get('SECRET_KEY') #'django-insecure-_50fo)(%8y39rgwl$p-#_671jhb&n4rg-#xxukf)xvko=bup%+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'True'
+
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(' ')
+
 
 
 # Application definition
@@ -95,6 +97,14 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+import dj_database_url
+
+DATABASES = {
+    'default': dj_database_url.parse(
+        "postgresql://smart_django_render_user:VLDW865Irz3Er8OoEBgjX85cpZbunMYn@dpg-d235stripnbc73812560-a.render.com:5432/smart_django_render"
+    )
+}
+
 
 
 # Password validation
