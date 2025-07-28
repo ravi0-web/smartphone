@@ -100,3 +100,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
    
+CSRF_TRUSTED_ORIGINS = [
+    'https://smartseek.onrender.com',
+    'https://smartseek.onrender.com/home/',
+]
