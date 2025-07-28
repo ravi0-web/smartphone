@@ -66,8 +66,8 @@ DATABASES = {
        }
    }
 import dj_database_url
-Database_url=os.environ.get("DATABASE_URL")
-DATABASES ['default']=dj_database_url.parse('Database_url')
+database_url=os.environ.get("DATABASE_URL")
+DATABASES ['default']=dj_database_url.parse(database_url)
 
 
 AUTH_PASSWORD_VALIDATORS = [
