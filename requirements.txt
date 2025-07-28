@@ -1,5 +1,5 @@
 Django>=4.0
-pandas==1.5.3  # or another stable version
+
 fuzzywuzzy==0.18.0
 python-Levenshtein==0.12.2
 gunicorn==21.2.0
