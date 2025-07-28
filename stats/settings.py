@@ -5,11 +5,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 LOGIN_REDIRECT_URL = '/home/'
 
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-default-secret-key')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-generated-key-here')
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['smartseek.onrender.com']
+ALLOWED_HOSTS = ['smartseek.onrender.com','localhost 127.0.0.1']
 
 INSTALLED_APPS = [
        'tailwind',
@@ -65,6 +65,10 @@ DATABASES = {
            'NAME': BASE_DIR / 'db.sqlite3',
        }
    }
+import dj_database_url
+DATABASES = {
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+}
 
 AUTH_PASSWORD_VALIDATORS = [
        {

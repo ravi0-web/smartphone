@@ -1,9 +1,9 @@
 Django>=4.0
-pandas==2.2.2
+pandas==1.5.3  # or another stable version
 fuzzywuzzy==0.18.0
 python-Levenshtein==0.12.2
 gunicorn==21.2.0
-
+Cython==0.29.32
 whitenoise==6.6.0
 django-browser-reload==1.18.0
 
