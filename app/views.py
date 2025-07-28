@@ -11,7 +11,7 @@ from fuzzywuzzy import fuzz
 from .models import ContactMessage
 import os
 
-# Load data once
+# Load and preprocess data once
 df = pd.read_csv(os.path.join(settings.BASE_DIR, 'data/smartphones.csv'))
 df.columns = df.columns.str.lower()
 df['full_name'] = df['name'].str.lower().fillna('') + ' ' + df['model'].str.lower().fillna('')
@@ -48,7 +48,6 @@ def signup(request):
     return render(request, 'signup.html')
 
 
-@csrf_exempt  # ✅ Remove this if CSRF token works
 def login_(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -57,10 +56,8 @@ def login_(request):
 
         if user is not None:
             login(request, user)
-            print("✅ Login successful for:", user.username)
             return redirect('home')
         else:
-            print("❌ Invalid login attempt")
             return render(request, 'login.html', {'message': 'Invalid credentials'})
     return render(request, 'login.html')
 
@@ -69,18 +66,19 @@ def logoutuser(request):
     logout(request)
     return redirect('login_')
 
-
 def recommend_phones(request):
     recommendations = None
     error = None
 
     if request.method == 'POST':
         try:
+            # Get form inputs
             brand = request.POST.get('brand', '').strip().lower()
             max_price = float(request.POST.get('max_price', 999999))
             min_ram = float(request.POST.get('min_ram', 0))
             min_storage = float(request.POST.get('min_storage', 0))
 
+            # Load and process CSV
             df = pd.read_csv(os.path.join(settings.BASE_DIR, 'data/smartphones.csv'))
             df['ram'] = df['ram'].astype(str)
             df['storage'] = df['storage'].astype(str)
@@ -89,6 +87,7 @@ def recommend_phones(request):
             df['Storage_GB'] = df['storage'].str.extract(r'(\d+)').astype(float)
             df['Price_INR'] = df['price'].str.replace('₹', '', regex=False).str.replace(',', '', regex=False).astype(float)
 
+            # Apply filters
             if brand and brand != "any":
                 filtered = df[
                     (df['Price_INR'] <= max_price) &
@@ -103,12 +102,16 @@ def recommend_phones(request):
                     (df['Storage_GB'] >= min_storage)
                 ].copy()
 
+            # Scoring logic
             def compute_score(row, alpha=2, beta=1.5, gamma=0.02):
                 return (alpha * row['RAM_GB']) + (beta * row['Storage_GB']) - (gamma * row['Price_INR'])
 
             filtered['Score'] = filtered.apply(compute_score, axis=1)
+
+            # Save to session to enable sorting
             request.session['filtered_phones'] = filtered.to_dict('records')
 
+            # Default sort by score
             top_10 = filtered.sort_values(by='Score', ascending=False).head(6)
             recommendations = top_10.to_dict('records')
 
