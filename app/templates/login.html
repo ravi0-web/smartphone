@@ -1,26 +1,46 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | Smartphone Recommendation Tool</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-100">
 
-def loginuser(request):
-    if request.user.is_authenticated:
-        return redirect('home')  # already logged in
+  <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm">
+    <h2 class="text-2xl font-bold text-center text-[#E34F4F] mb-6">Login</h2>
 
-    message = ''
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+    <form method="POST" action="{% url 'loginuser' %}">
+      {% csrf_token %}
 
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('home')
-        else:
-            message = 'Invalid username or password.'
+      <div class="mb-4">
+        <label class="block text-gray-700 mb-1">Username</label>
+        <input name="username" type="text" placeholder="Enter your username"
+               class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#E34F4F]" required>
+      </div>
 
-    return render(request, 'login.html', {'message': message})
+      <div class="mb-4">
+        <label class="block text-gray-700 mb-1">Password</label>
+        <input name="password" type="password" placeholder="••••••••"
+               class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#E34F4F]" required>
+      </div>
 
-@login_required
-def logoutuser(request):
-    logout(request)
-    return redirect('loginuser')
+      {% if message %}
+        <p class="text-center text-red-500 mt-2">{{ message }}</p>
+      {% endif %}
+
+      <button type="submit"
+              class="w-full bg-[#E34F4F] text-white py-2 rounded hover:bg-red-600 transition duration-200">
+        Log In
+      </button>
+    </form>
+
+    <p class="mt-4 text-center text-sm text-gray-600">
+      Don't have an account?
+      <a href="{% url 'register' %}" class="text-[#E34F4F] hover:underline">Sign up</a>
+    </p>
+  </div>
+
+</body>
+</html>
