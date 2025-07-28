@@ -66,7 +66,8 @@ DATABASES = {
        }
    }
 import dj_database_url
-DATABASES ['default']=dj_database_url.parse('postgresql://smart_django_render_user:VLDW865Irz3Er8OoEBgjX85cpZbunMYn@dpg-d235stripnbc73812560-a.oregon-postgres.render.com/smart_django_render')
+Database_url=os.environ.get("DATABASE_URL")
+DATABASES ['default']=dj_database_url.parse('Database_url')
 
 
 AUTH_PASSWORD_VALIDATORS = [
