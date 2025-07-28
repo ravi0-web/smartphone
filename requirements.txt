@@ -6,7 +6,7 @@ gunicorn==21.2.0
 Cython==0.29.32
 whitenoise==6.6.0
 django-browser-reload==1.18.0
-django-tailwind==0.3.0  # or the latest stable version
+django-tailwind  # or the latest stable version
 sqlparse==0.5.3
 typing_extensions==4.14.1
 asgiref==3.7.2
