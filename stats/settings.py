@@ -3,7 +3,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-LOGIN_REDIRECT_URL = '/home/'
+LOGIN_REDIRECT_URL = 'home'
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-generated-key-here')
 
