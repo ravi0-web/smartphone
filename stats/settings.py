@@ -3,7 +3,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = '/home/'
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-generated-key-here')
 
@@ -99,3 +99,6 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.onrender.com',
+]
