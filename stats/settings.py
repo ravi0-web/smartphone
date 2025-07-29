@@ -7,7 +7,7 @@ LOGIN_REDIRECT_URL = '/home/'
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-generated-key-here')
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['smartseek.onrender.com','localhost 127.0.0.1']
 
