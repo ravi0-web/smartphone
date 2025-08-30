@@ -33,3 +33,7 @@ echo "-----> Verifying installation"
 python manage.py check --deploy
 
 echo "-----> Build completed successfully"
+python manage.py createsuperuser \
+  --noinput \
+  --username "$DJANGO_SUPERUSER_USERNAME" \
+  --email "$DJANGO_SUPERUSER_EMAIL" || true
