@@ -58,7 +58,7 @@ TEMPLATES = [
    ]
 
 WSGI_APPLICATION = 'stats.wsgi.application'
-
+import dj_database_url
 DATABASES = {
        'default': {
            'ENGINE': 'django.db.backends.sqlite3',
