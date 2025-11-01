@@ -1,2 +1,2 @@
-web: gunicorn stats.wsgi --log-file -
+web: gunicorn PRD.wsgi --log-file -
 
