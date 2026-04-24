@@ -11,7 +11,7 @@
 <body class="bg-gray-100 min-h-screen">
 
   <!-- Navbar -->
-  <nav class="bg-[#E34F4F] text-white px-4 py-3 shadow-md">
+  <nav class="bg-[#E34F4F] text-white px-4 py-3 shadow-md sticky top-0 z-50">
     <div class="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto">
       <!-- Logo -->
       <div class="mb-2 md:mb-0">
@@ -36,7 +36,6 @@
           <a href="{% url "contact" %}" class="hover:bg-white hover:text-[#E34F4F] px-3 py-2 rounded transition">Contact Us</a>
      
 
-        <a href="{% url "about" %}" class="hover:bg-white hover:text-[#E34F4F] px-3 py-2 rounded transition">About Us</a>
          <a href="{% url 'logoutuser' %}" class="hover:bg-white hover:text-[#E34F4F] px-3 py-2 rounded transition">Signout <i class="fa-solid fa-arrow-right-from-bracket"></i></a>
       </div>
     </div>
@@ -60,7 +59,7 @@
         <ul class="space-y-1 text-sm">
           <li><a href="{% url 'home' %}" class="hover:underline">Home</a></li>
           <li><a href="{% url 'compare' %}" class="hover:underline">Compare Phones</a></li>
-          <li><a href="{% url "about" %}" class="hover:underline">About Us</a></li>
+          
           <li><a href="{% url "contact" %}" class="hover:underline">Contact Us</a></li>
         </ul>
       </div>

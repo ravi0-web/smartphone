@@ -9,7 +9,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-generated-key-here')
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['smartseek.onrender.com','localhost 127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
        'tailwind',

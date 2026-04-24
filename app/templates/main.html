@@ -85,46 +85,110 @@
       </form>
     </aside>
 
-    <!-- Main Content: Recommendations -->
-    <section class="md:col-span-3 space-y-4">
-      {% if recommendations %}
-  <div class="flex justify-end mb-4">
-    <form method="get" class="flex items-center space-x-2">
-      <label for="sort_by" class="text-sm font-medium">Sort by:</label>
-      <select name="sort_by" id="sort_by" class="border p-1 rounded" onchange="this.form.submit()">
-        <option value="" {% if request.GET.sort_by == "" %}selected{% endif %}>Best Match</option>
-        <option value="name" {% if request.GET.sort_by == "name" %}selected{% endif %}>Name (A–Z)</option>
-        <option value="price_asc" {% if request.GET.sort_by == "price_asc" %}selected{% endif %}>Price (Low to High)</option>
-        <option value="price_desc" {% if request.GET.sort_by == "price_desc" %}selected{% endif %}>Price (High to Low)</option>
-      </select>
-    </form>
-  </div>
-{% endif %}
+    <!-- Main Content -->
+    <section class="md:col-span-3 space-y-6">
 
-      <h2 class="text-xl font-semibold">Recommended Smartphones</h2>
-
+      <!-- Recommendations (shown first when user filters) -->
       {% if recommendations %}
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center">
+            <div class="w-1 h-7 bg-blue-600 rounded-full mr-3"></div>
+            <h2 class="text-xl font-bold text-gray-800">Recommended Smartphones</h2>
+          </div>
+          <form method="get" class="flex items-center space-x-2">
+            <label for="sort_by" class="text-sm font-medium">Sort by:</label>
+            <select name="sort_by" id="sort_by" class="border p-1 rounded" onchange="this.form.submit()">
+              <option value="" {% if request.GET.sort_by == "" %}selected{% endif %}>Best Match</option>
+              <option value="name" {% if request.GET.sort_by == "name" %}selected{% endif %}>Name (A–Z)</option>
+              <option value="price_asc" {% if request.GET.sort_by == "price_asc" %}selected{% endif %}>Price (Low to High)</option>
+              <option value="price_desc" {% if request.GET.sort_by == "price_desc" %}selected{% endif %}>Price (High to Low)</option>
+            </select>
+          </form>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="phoneList">
           {% for phone in recommendations %}
-          <div class="bg-white rounded-2xl shadow-md p-4">
-            <div>
-        <img src="{{ phone.img_url }}" alt="{{ phone.name }}" class="rounded-xl shadow-md w-full h-[300px]" />
-      </div>
-           <h3 class="text-lg font-bold">{{ phone.name }} {{ phone.model }}</h3>
-            <p class="text-sm text-gray-500">{{ phone.storage }} • {{ phone.ram }}</p>
-            <p class="mt-2 font-semibold">{{ phone.price }}</p>
-            <p class="text-green-600 text-sm">Score: {{ phone.Score|floatformat:2 }}</p>
-            <a href="{% url 'phone_detail' phone.model|lower|slugify %}">
-              <button class="mt-2 bg-green-600 text-white w-full py-1 rounded hover:bg-green-700">View Details</button>
-            </a>
+          <a href="{% url 'phone_detail' phone.slug %}" class="group block">
+            <div class="bg-white rounded-2xl shadow-md overflow-hidden transition-all duration-300 ease-in-out 
+                        group-hover:shadow-2xl group-hover:-translate-y-2 group-hover:scale-[1.03]">
+              <div class="h-56 bg-gray-50 flex items-center justify-center overflow-hidden p-4">
+                <img src="{{ phone.img_url }}" alt="{{ phone.name }}" 
+                     class="max-h-full object-contain transition-transform duration-500 group-hover:scale-110" />
               </div>
+              <div class="p-4">
+                <h3 class="text-sm font-bold text-gray-800 truncate">{{ phone.name }} {{ phone.model }}</h3>
+                <p class="text-xs text-gray-500 mt-1">{{ phone.storage }} • {{ phone.ram }}</p>
+                <p class="text-md font-bold text-[#E34F4F] mt-2">{{ phone.price }}</p>
+              </div>
+            </div>
+          </a>
           {% endfor %}
         </div>
+      </div>
       {% elif error %}
         <p class="text-red-500 font-semibold">{{ error }}</p>
-      {% else %}
-        <p class="text-gray-500">No results yet. Use the filter to find phones.</p>
       {% endif %}
+
+      {% if not recommendations %}
+      <!-- Latest Phones -->
+      {% if latest_phones %}
+      <div>
+        <div class="flex items-center mb-4">
+          <div class="w-1 h-7 bg-[#E34F4F] rounded-full mr-3"></div>
+          <h2 class="text-xl font-bold text-gray-800"> Latest Phones</h2>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {% for phone in latest_phones %}
+          <a href="{% url 'phone_detail' phone.slug %}" class="group block">
+            <div class="bg-white rounded-2xl shadow-md overflow-hidden transition-all duration-300 ease-in-out 
+                        group-hover:shadow-2xl group-hover:-translate-y-2 group-hover:scale-[1.03]">
+              <div class="h-48 bg-gray-50 flex items-center justify-center overflow-hidden p-3">
+                <img src="{{ phone.img_url }}" alt="{{ phone.name }} {{ phone.model }}" 
+                     class="max-h-full object-contain transition-transform duration-500 group-hover:scale-110" />
+              </div>
+              <div class="p-3">
+                <span class="inline-block bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full mb-1">NEW</span>
+                <h3 class="text-sm font-bold text-gray-800 truncate">{{ phone.name }} {{ phone.model }}</h3>
+                <p class="text-xs text-gray-500 mt-1">{{ phone.ram }} • {{ phone.storage }}</p>
+                <p class="text-md font-bold text-[#E34F4F] mt-1">{{ phone.price }}</p>
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Best Selling Phones -->
+      {% if best_sellers %}
+      <div>
+        <div class="flex items-center mb-4">
+          <div class="w-1 h-7 bg-yellow-500 rounded-full mr-3"></div>
+          <h2 class="text-xl font-bold text-gray-800"> Best Selling Phones</h2>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {% for phone in best_sellers %}
+          <a href="{% url 'phone_detail' phone.slug %}" class="group block">
+            <div class="bg-white rounded-2xl shadow-md overflow-hidden transition-all duration-300 ease-in-out 
+                        group-hover:shadow-2xl group-hover:-translate-y-2 group-hover:scale-[1.03]">
+              <div class="h-48 bg-gray-50 flex items-center justify-center overflow-hidden p-3">
+                <img src="{{ phone.img_url }}" alt="{{ phone.name }} {{ phone.model }}" 
+                     class="max-h-full object-contain transition-transform duration-500 group-hover:scale-110" />
+              </div>
+              <div class="p-3">
+                <span class="inline-block bg-yellow-100 text-yellow-700 text-xs font-semibold px-2 py-0.5 rounded-full mb-1">⭐ BEST SELLER</span>
+                <h3 class="text-sm font-bold text-gray-800 truncate">{{ phone.name }} {{ phone.model }}</h3>
+                <p class="text-xs text-gray-500 mt-1">{{ phone.ram }} • {{ phone.storage }}</p>
+                <p class="text-md font-bold text-[#E34F4F] mt-1">{{ phone.price }}</p>
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      {% endif %}
+
     </section>
   </main>
 

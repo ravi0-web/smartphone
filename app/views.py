@@ -1,28 +1,22 @@
-from django.conf import settings
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
-import pandas as pd
 from fuzzywuzzy import fuzz
-from .models import ContactMessage
-import os
-
-# Load and preprocess data once
-df = pd.read_csv(os.path.join(settings.BASE_DIR, 'data/smartphones.csv'))
-df.columns = df.columns.str.lower()
-df['full_name'] = df['name'].str.lower().fillna('') + ' ' + df['model'].str.lower().fillna('')
-df['slug'] = df['model'].str.lower().str.replace(' ', '-')
-df['model_slug'] = df['slug'].str.replace(r'[^a-z0-9\-]', '', regex=True)
+from .models import ContactMessage, Smartphone
 
 
 def home(request):
     if request.user.is_anonymous:
         return redirect('login_')
-    return render(request, 'main.html')
+    latest_phones = Smartphone.objects.filter(is_latest=True)[:8]
+    best_sellers = Smartphone.objects.filter(is_best_seller=True)[:8]
+    return render(request, 'main.html', {
+        'latest_phones': latest_phones,
+        'best_sellers': best_sellers,
+    })
 
 
 def signup(request):
@@ -66,6 +60,7 @@ def logoutuser(request):
     logout(request)
     return redirect('login_')
 
+
 def recommend_phones(request):
     recommendations = None
     error = None
@@ -74,86 +69,126 @@ def recommend_phones(request):
         try:
             # Get form inputs
             brand = request.POST.get('brand', '').strip().lower()
-            max_price = float(request.POST.get('max_price', 999999))
-            min_ram = float(request.POST.get('min_ram', 0))
-            min_storage = float(request.POST.get('min_storage', 0))
 
-            # Load and process CSV
-            df = pd.read_csv(os.path.join(settings.BASE_DIR, 'data/smartphones.csv'))
-            df['ram'] = df['ram'].astype(str)
-            df['storage'] = df['storage'].astype(str)
-            df['price'] = df['price'].astype(str)
-            df['RAM_GB'] = df['ram'].str.extract(r'(\d+)').astype(float)
-            df['Storage_GB'] = df['storage'].str.extract(r'(\d+)').astype(float)
-            df['Price_INR'] = df['price'].str.replace('₹', '', regex=False).str.replace(',', '', regex=False).astype(float)
+            max_price_val = request.POST.get('max_price')
+            max_price = float(max_price_val) if max_price_val else 999999
 
-            # Apply filters
+            min_ram_val = request.POST.get('min_ram')
+            min_ram = float(min_ram_val) if min_ram_val else 0
+
+            min_storage_val = request.POST.get('min_storage')
+            min_storage = float(min_storage_val) if min_storage_val else 0
+
+            # Get all phones from database
+            phones = Smartphone.objects.all()
+
+            # Apply brand filter
             if brand and brand != "any":
-                filtered = df[
-                    (df['Price_INR'] <= max_price) &
-                    (df['RAM_GB'] >= min_ram) &
-                    (df['Storage_GB'] >= min_storage) &
-                    (df['name'].str.lower().str.contains(brand))
-                ].copy()
-            else:
-                filtered = df[
-                    (df['Price_INR'] <= max_price) &
-                    (df['RAM_GB'] >= min_ram) &
-                    (df['Storage_GB'] >= min_storage)
-                ].copy()
+                phones = phones.filter(name__icontains=brand)
 
-            # Scoring logic
-            def compute_score(row, alpha=2, beta=1.5, gamma=0.02):
-                return (alpha * row['RAM_GB']) + (beta * row['Storage_GB']) - (gamma * row['Price_INR'])
+            # Convert to list and apply numeric filters + scoring
+            phone_list = []
+            for phone in phones:
+                ram_gb = phone.ram_gb
+                storage_gb = phone.storage_gb
+                price_inr = phone.price_inr
 
-            filtered['Score'] = filtered.apply(compute_score, axis=1)
+                if price_inr > max_price:
+                    continue
+                if ram_gb < min_ram:
+                    continue
+                if storage_gb < min_storage:
+                    continue
 
-            # Save to session to enable sorting
-            request.session['filtered_phones'] = filtered.to_dict('records')
+                # Scoring logic
+                score = (2 * ram_gb) + (1.5 * storage_gb) - (0.02 * price_inr)
+
+                phone_list.append({
+                    'name': phone.name,
+                    'model': phone.model,
+                    'storage': phone.storage,
+                    'ram': phone.ram,
+                    'price': phone.price,
+                    'img_url': phone.img_url,
+                    'Score': round(score, 2),
+                    'Price_INR': price_inr,
+                    'RAM_GB': ram_gb,
+                    'Storage_GB': storage_gb,
+                    'slug': phone.slug,
+                })
+
+            # Save to session for sorting
+            request.session['filtered_phones'] = phone_list
 
             # Default sort by score
-            top_10 = filtered.sort_values(by='Score', ascending=False).head(6)
-            recommendations = top_10.to_dict('records')
+            phone_list.sort(key=lambda x: x['Score'], reverse=True)
+            recommendations = phone_list[:6]
 
         except Exception as e:
             error = f"Error: {str(e)}"
 
     elif request.method == 'GET' and 'filtered_phones' in request.session:
         sort_by = request.GET.get('sort_by', '')
-        filtered = pd.DataFrame(request.session['filtered_phones'])
+        phone_list = request.session['filtered_phones']
 
         if sort_by == 'name':
-            filtered = filtered.sort_values(by='name')
+            phone_list.sort(key=lambda x: x.get('name', ''))
         elif sort_by == 'price_asc':
-            filtered = filtered.sort_values(by='Price_INR')
+            phone_list.sort(key=lambda x: x.get('Price_INR', 0))
         elif sort_by == 'price_desc':
-            filtered = filtered.sort_values(by='Price_INR', ascending=False)
+            phone_list.sort(key=lambda x: x.get('Price_INR', 0), reverse=True)
         else:
-            filtered = filtered.sort_values(by='Score', ascending=False)
+            phone_list.sort(key=lambda x: x.get('Score', 0), reverse=True)
 
-        recommendations = filtered.head(6).to_dict('records')
+        recommendations = phone_list[:6]
+
+    latest_phones = Smartphone.objects.filter(is_latest=True)[:8]
+    best_sellers = Smartphone.objects.filter(is_best_seller=True)[:8]
 
     return render(request, 'main.html', {
         'recommendations': recommendations,
-        'error': error
+        'error': error,
+        'latest_phones': latest_phones,
+        'best_sellers': best_sellers,
     })
 
 
 def phone_detail_view(request, model_slug):
-    phone_data = df[df['model_slug'] == model_slug]
-    if phone_data.empty:
-        return render(request, 'error.html', {'error': 'Phone not found'})
-    phone = phone_data.iloc[0].to_dict()
-    return render(request, 'phone_detail.html', {'phone': phone})
+    phone = get_object_or_404(Smartphone, slug=model_slug)
+    # Convert to dict for template compatibility
+    phone_dict = {
+        'name': phone.name,
+        'model': phone.model,
+        'storage': phone.storage,
+        'ram': phone.ram,
+        'primary_camera': phone.primary_camera,
+        'secondary_camera': phone.secondary_camera,
+        'colors': phone.colors,
+        'processor': phone.processor,
+        'GPU': phone.gpu,
+        'OS': phone.os,
+        'display_resolution': phone.display_resolution,
+        'memory': phone.memory,
+        'loud_speaker': phone.loud_speaker,
+        'sensors': phone.sensors,
+        'battery': phone.battery,
+        'price': phone.price,
+        'img_url': phone.img_url,
+    }
+    return render(request, 'phone_detail.html', {'phone': phone_dict})
 
 
 def search_suggestions(request):
     query = request.GET.get('q', '').lower()
     suggestions = []
     if query:
-        df['similarity'] = df['full_name'].apply(lambda x: fuzz.partial_ratio(x, query))
-        matches = df.sort_values(by='similarity', ascending=False).head(5)
-        suggestions = matches['model'].tolist()
+        phones = Smartphone.objects.all()
+        scored = []
+        for phone in phones:
+            score = fuzz.partial_ratio(phone.full_name, query)
+            scored.append((score, phone.model))
+        scored.sort(key=lambda x: x[0], reverse=True)
+        suggestions = [item[1] for item in scored[:5]]
     return JsonResponse(suggestions, safe=False)
 
 
@@ -161,10 +196,22 @@ def search_results(request):
     query = request.GET.get('q', '').lower()
     results = []
     if query:
-        df['similarity'] = df['full_name'].apply(lambda x: fuzz.partial_ratio(x, query))
-        matches = df.sort_values(by='similarity', ascending=False)
-        valid_matches = matches[matches['model_slug'].notnull() & (matches['model_slug'] != '')]
-        results = valid_matches.head(10).to_dict('records')
+        phones = Smartphone.objects.all()
+        scored = []
+        for phone in phones:
+            score = fuzz.partial_ratio(phone.full_name, query)
+            if phone.slug:
+                scored.append((score, phone))
+        scored.sort(key=lambda x: x[0], reverse=True)
+        results = []
+        for _, phone in scored[:10]:
+            results.append({
+                'name': phone.name,
+                'model': phone.model,
+                'price': phone.price,
+                'img_url': phone.img_url,
+                'model_slug': phone.slug,
+            })
     return render(request, 'search_results.html', {'query': query, 'results': results})
 
 
@@ -174,33 +221,31 @@ def compare(request):
         phone1_query = request.POST.get('phone1', '').lower().strip()
         phone2_query = request.POST.get('phone2', '').lower().strip()
 
-        phone1_data = df[df['full_name'].str.contains(phone1_query, na=False)].head(1)
-        phone2_data = df[df['full_name'].str.contains(phone2_query, na=False)].head(1)
+        # Fuzzy match phone 1
+        phone1 = _find_best_match(phone1_query)
+        phone2 = _find_best_match(phone2_query)
 
-        if not phone1_data.empty and not phone2_data.empty:
-            phone1 = phone1_data.iloc[0]
-            phone2 = phone2_data.iloc[0]
-
+        if phone1 and phone2:
             comparison = {
                 'phone1': {
-                    'img_url': phone1['img_url'],
-                    'name': f"{phone1['name']} {phone1['model']}",
-                    'ram': phone1['ram'],
-                    'storage': phone1['storage'],
-                    'battery': phone1['battery'],
-                    'camera': phone1['primary_camera'],
-                    'processor': phone1['processor']
+                    'img_url': phone1.img_url,
+                    'name': f"{phone1.name} {phone1.model}",
+                    'ram': phone1.ram,
+                    'storage': phone1.storage,
+                    'battery': phone1.battery,
+                    'camera': phone1.primary_camera,
+                    'processor': phone1.processor,
                 },
                 'phone2': {
-                    'img_url': phone2['img_url'],
-                    'name': f"{phone2['name']} {phone2['model']}",
-                    'ram': phone2['ram'],
-                    'storage': phone2['storage'],
-                    'battery': phone2['battery'],
-                    'camera': phone2['primary_camera'],
-                    'processor': phone2['processor']
+                    'img_url': phone2.img_url,
+                    'name': f"{phone2.name} {phone2.model}",
+                    'ram': phone2.ram,
+                    'storage': phone2.storage,
+                    'battery': phone2.battery,
+                    'camera': phone2.primary_camera,
+                    'processor': phone2.processor,
                 },
-                'better': decide_better(phone1, phone2)
+                'better': _decide_better(phone1, phone2)
             }
         else:
             comparison['error'] = "One or both smartphones not found!"
@@ -208,27 +253,46 @@ def compare(request):
     return render(request, 'compare.html', {'comparison': comparison})
 
 
-def decide_better(phone1, phone2):
+def _find_best_match(query):
+    """Find the best matching phone using fuzzy search."""
+    phones = Smartphone.objects.all()
+    best_score = 0
+    best_phone = None
+    for phone in phones:
+        score = fuzz.partial_ratio(phone.full_name, query)
+        if score > best_score:
+            best_score = score
+            best_phone = phone
+    return best_phone if best_score > 50 else None
+
+
+def _decide_better(phone1, phone2):
     def safe_float(val):
         try:
             return float(str(val).split()[0])
         except:
             return 0
 
-    score1 = safe_float(phone1['ram']) + safe_float(phone1['storage']) + safe_float(phone1['battery']) + safe_float(phone1['primary_camera'])
-    score2 = safe_float(phone2['ram']) + safe_float(phone2['storage']) + safe_float(phone2['battery']) + safe_float(phone2['primary_camera'])
+    score1 = safe_float(phone1.ram) + safe_float(phone1.storage) + safe_float(phone1.battery) + safe_float(phone1.primary_camera)
+    score2 = safe_float(phone2.ram) + safe_float(phone2.storage) + safe_float(phone2.battery) + safe_float(phone2.primary_camera)
 
     if score1 > score2:
-        return f"{phone1['name']} {phone1['model']}"
+        return f"{phone1.name} {phone1.model}"
     elif score2 > score1:
-        return f"{phone2['name']} {phone2['model']}"
+        return f"{phone2.name} {phone2.model}"
     else:
         return "Both are equally good"
 
 
 def search_phones(request):
     query = request.GET.get('term', '').lower()
-    matches = df[df['full_name'].str.contains(query, na=False)]['full_name'].head(10).tolist()
+    phones = Smartphone.objects.all()
+    matches = []
+    for phone in phones:
+        if query in phone.full_name:
+            matches.append(phone.full_name)
+            if len(matches) >= 10:
+                break
     return JsonResponse(matches, safe=False)
 
 
